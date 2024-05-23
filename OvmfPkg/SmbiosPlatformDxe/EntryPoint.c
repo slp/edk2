@@ -6,6 +6,8 @@
 
 #include <Library/MemoryAllocationLib.h> // FreePool()
 #include <OvmfPlatforms.h>               // CLOUDHV_DEVICE_ID
+#include <IndustryStandard/SmBios.h>  // SMBIOS_TABLE_3_0_ENTRY_POINT
+#include <Library/DebugLib.h>
 
 #include "SmbiosPlatformDxe.h"
 
@@ -28,25 +30,45 @@ SmbiosTablePublishEntry (
 {
   EFI_STATUS  Status;
   UINT8       *SmbiosTables;
-  UINT16      HostBridgeDevId;
 
   Status = EFI_NOT_FOUND;
+
+  #define KRUN_SMBIOS_ADDRESS  0x4000F000
+
   //
   // Add SMBIOS data if found
   //
-  HostBridgeDevId = PcdGet16 (PcdOvmfHostBridgePciDevId);
-  if (HostBridgeDevId == CLOUDHV_DEVICE_ID) {
-    SmbiosTables = GetCloudHvSmbiosTables ();
-    if (SmbiosTables != NULL) {
-      Status = InstallAllStructures (SmbiosTables);
-    }
-  } else {
-    SmbiosTables = GetQemuSmbiosTables ();
-    if (SmbiosTables != NULL) {
-      Status = InstallAllStructures (SmbiosTables);
-      FreePool (SmbiosTables);
-    }
+  DEBUG ((
+    DEBUG_VERBOSE,
+    "%a: Installing libkrun SMBIOS: addr 0x%lx\n",
+    __func__,
+    KRUN_SMBIOS_ADDRESS
+  ));
+  
+  SMBIOS_TABLE_3_0_ENTRY_POINT  *KrunTables = (VOID *)KRUN_SMBIOS_ADDRESS;
+
+  if ((KrunTables->AnchorString[0] == '_') &&
+      (KrunTables->AnchorString[1] == 'S') &&
+      (KrunTables->AnchorString[2] == 'M') &&
+      (KrunTables->AnchorString[3] == '3') &&
+      (KrunTables->AnchorString[4] == '_'))
+  {
+    DEBUG ((
+      DEBUG_VERBOSE,
+      "%a: Found libkrun SMBIOS\n",
+      __func__
+    ));
+    
+    SmbiosTables = (UINT8 *)(UINTN)KrunTables->TableAddress;
+    Status = InstallAllStructures (SmbiosTables);
   }
+
+  DEBUG ((
+    DEBUG_VERBOSE,
+    "%a: libkrun SMBIOS install status: %d\n",
+    __func__,
+    Status
+  ));
 
   return Status;
 }

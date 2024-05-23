@@ -365,6 +365,12 @@
   }
 
   #
+  # SMBIOS Support
+  #
+  MdeModulePkg/Universal/SmbiosDxe/SmbiosDxe.inf
+  OvmfPkg/SmbiosPlatformDxe/SmbiosPlatformDxe.inf
+
+  #
   # ACPI Support
   #
   OvmfPkg/PlatformHasAcpiDtDxe/PlatformHasAcpiDtDxe.inf
