@@ -177,6 +177,12 @@ READ_LOCK_STATUS   = TRUE
   INF OvmfPkg/QemuKernelLoaderFsDxe/QemuKernelLoaderFsDxe.inf
 
   #
+  # SMBIOS Support
+  #
+  INF MdeModulePkg/Universal/SmbiosDxe/SmbiosDxe.inf
+  INF OvmfPkg/SmbiosPlatformDxe/SmbiosPlatformDxe.inf
+
+  #
   # ACPI Support
   #
   INF OvmfPkg/PlatformHasAcpiDtDxe/PlatformHasAcpiDtDxe.inf
